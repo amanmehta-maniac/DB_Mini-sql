@@ -46,38 +46,30 @@ def projector(to_show, data_table):
     Aggregate = [];
 
     # to_show[0] = to_show[0].lower();
-    print to_show[0];
+    # print to_show[0];
+
     Aggregate.append('min');
     Aggregate.append('max');
     Aggregate.append('avg');
     Aggregate.append('sum');
     Aggregate.append('distinct');
-    Aggregate.append('Min');
-    Aggregate.append('Max');
-    Aggregate.append('Avg');
-    Aggregate.append('Sum');
-    Aggregate.append('Distinct');
-    Aggregate.append('MIN');
-    Aggregate.append('MAX');
-    Aggregate.append('AVG');
-    Aggregate.append('SUM');
-    Aggregate.append('DISTINCT');
-    flag = 0;
+    
+    lower_toshow = to_show[0].lower();
+    flag = 0
     for x in Aggregate:
-        if x in to_show[0]:
+        if x in lower_toshow:
             flag = 1
+            # print "flag: ", flag
             break
     if flag:
         l = re.split(r'[\ \(\)]+',to_show[0])
-        print l
+        # print l
         ind = (data_table.columns).index(l[1])
-
         values = []
         for row in data_table.data:
             values.append(int(row[ind]))
-
-        print l[1]
-
+        # print l[1]
+        l[0] = l[0].upper()
         if(l[0] == 'MAX'):
         	print max(values)
         elif(l[0] == 'MIN'):
@@ -211,6 +203,7 @@ def selectProcessor(commands):
     data_table = joinTable(from_tables)
 
     if len(commands)>4 and ('WHERE' in commands[4] or 'where' in  commands[4]):
+        print "yo where"
         handelWhere(data_table, commands[4])
     to_show = commands[1]
     to_show = re.split(r'[\ \t,]+',to_show)
@@ -220,18 +213,24 @@ def selectProcessor(commands):
 
 
 def queryProcessor(query):
-    pQuery = sqlparse.parse(query)[0].tokens
-    print pQuery
-    commands = []
-    lst = sqlparse.sql.IdentifierList(pQuery).get_identifiers()
-    print "lst", str(lst)
-    for command in lst:
-    	commands.append(str(command))
-    if commands[0] == 'SELECT' or commands[0] == 'select':
-        selectProcessor(commands)
+    # print query[-1];
+    if query[-1]!=';':
+        print "Syntax Err: Expected ';' in the end"    
     else:
-        print "This query is not supported by this engine"
-    print commands
+        pQuery = sqlparse.parse(query)[0].tokens
+        # print pQuery
+        commands = []
+        lst = sqlparse.sql.IdentifierList(pQuery).get_identifiers()
+        # print "lst", str(lst)
+        # print "wtf"
+        for command in lst:
+            commands.append(str(command))
+        if commands[0].lower() == 'select':
+            selectProcessor(commands)
+        else:
+            print "This query is not supported by my slq-engine"
+        # print commands
+
 
 
 def main():
